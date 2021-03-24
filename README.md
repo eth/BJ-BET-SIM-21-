@@ -67,12 +67,9 @@ These House Rules are Hard Coded:
 | *WIN_STREAK* | Used in conjuction with BET_INCREMENT |
 | *BET_AFT_SURR*| When true, leaves 50% of prior bet for next hand |
 | *WALK_AWAY* | A Preset amount to win that ENDS the SIMULATiON
-
-
 | *BET_SPREAD*  | The multiplier for the bet size in a player favorable counting situation |
 | *COUNT_TIER* | True Count Tier Values for raising bets |
 | *COUNT_STRATEGY* | User Selected Strategy to use for Counting Cards
-
 | *DEBUG_PRINT* | Prints to console details of every hand
 | *CSV_OUTPUT* | Exports to CSV results
 
