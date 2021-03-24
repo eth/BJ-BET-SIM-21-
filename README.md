@@ -1,4 +1,3 @@
-# BJ-BET-SIM-21-
 BlackJack-SIM | Card Counting
 ==============================================
 The Simulator takes a given basic strategy(BS) as input (defined in a .csv-file) and simulates the win/loss against a random shoe with user entered number of decks. The sim counts cards using one of  3 card counting systems selected by user. Depending on the current count, or other settings, simulation will adjust the bet size.  
