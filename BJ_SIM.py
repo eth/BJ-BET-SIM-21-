@@ -11,29 +11,29 @@ import numpy as np
 
 from importer.StrategyImporter import StrategyImporter
 
-DEBUG_PRINT =1 # Debug Print to Console 
+DEBUG_PRINT =0 # Debug Print to Console 
 CSV_OUTPUT = 0 # Export details to CSV
 
 GAME_OPTIONS = {
     'usecount' : True, # Modify Bet based on Card Counting Strat
 }
 
-SIMULATIONS = 3 #Simulation ends when # Shoes is reached OR Player_Bank <=0 OR Player_Bank >= WALK_AWAY
-SHOES = 5 #No. of shoes to simulate  
-SHOE_SIZE = 6 # No. of Decks per shoe
-SHOE_PENETRATION = 0.25 # Remaining % of cards before shuffle 
+SIMULATIONS = 1 #Simulation ends when # Shoes is reached OR Player_Bank <=0 OR Player_Bank >= WALK_AWAY
+SHOES = 10000 #No. of shoes to simulate  
+SHOE_SIZE = 4 # No. of Decks per shoe
+SHOE_PENETRATION = 0.3 # Remaining % of cards before shuffle 
 
-BET_MINIMUM = 100 # Minimum Bet 
-BET_INCREMENT = 0 # set to 0 to disable Progressive betting
-BANK_START = 10000 # Player Bank
-WIN_STREAK = 0 # consecutive hands to win before returning to Bet_Min
+BET_MINIMUM = 1 # Minimum Bet 
+BET_INCREMENT = 50 # set to 0 to disable Progressive betting
+BANK_START = 20000 # Player Bank
+WIN_STREAK = 999999999999 # consecutive hands to win before returning to Bet_Min
 BET_AFT_SURR = False # False = BetMin | True = Bet greater of 50% or Min
-WALK_AWAY = 5000 #BET_MINIMUM * 26.7 # amount to win before Ending Game
+WALK_AWAY = 999999999999 #BET_MINIMUM * 26.7 # amount to win before Ending Game
 
 HOUSE_RULES = {
     'triple7': False,  # Count 3x7 as a blackjack
-    'hitsoft17': True, # Does dealer hit soft 17
-    'allowsurr': True, # Surrender Allowed (Assumes Late Surr)
+    'hitsoft17': False, # Does dealer hit soft 17
+    'allowsurr': False, # Surrender Allowed (Assumes Late Surr)
     #TODO'maxsplithands': 4 # player max hands to split | aces only split once hard coded 
 }
 
@@ -44,15 +44,16 @@ CARDS = {"Ace": 11, "Two": 2, "Three": 3, "Four": 4, "Five": 5, "Six": 6, "Seven
 CC_OMEGA_II = {"Ace": 0, "Two": 1, "Three": 1, "Four": 2, "Five": 2, "Six": 2, "Seven": 1, "Eight": 0, "Nine": -1, "Ten": -2, "Jack": -2, "Queen": -2, "King": -2} # ADVANCED Hi-Opt 2
 CC_OMEGA_I = {"Ace": 0, "Two": 0, "Three": 1, "Four": 1, "Five": 1, "Six": 1, "Seven": 0, "Eight": 0, "Nine": 0, "Ten": -1, "Jack": -1, "Queen": -1, "King": -1} # MID LEVEL Einstein - Hi-Opt 1
 CC_HIGHLOW = {"Ace": -1, "Two": 1, "Three": 1, "Four": 1, "Five": 1, "Six": 1, "Seven": 0, "Eight": 0, "Nine": 0, "Ten": -1, "Jack": -1, "Queen": -1, "King": -1} # Basic Counting 
+CC_RAPC = {"Ace": -4, "Two": 2, "Three": 3, "Four": 3, "Five": 4, "Six": 3, "Seven": 2, "Eight": 0, "Nine": -1, "Ten": -3, "Jack": -3, "Queen": -3, "King": -3}
 
-COUNT_STRATEGY = CC_OMEGA_II  
+COUNT_STRATEGY = CC_RAPC
 BET_SPREAD = 10.0 #BET Multiplierr if truecount is favorable
 COUNT_TIER = [5,10,15] # TrueCount Values for setting bet level - Higher truecount = bet more
 
 
 #//////////  STRATEGY & FILE IMPORT OPTIONS  \\\\\\\\\\\\
 if len(sys.argv) >1:
-    STRATEGY_FILE = sys.argv[2] #user passed custom strategy file 
+    STRATEGY_FILE = sys.argv[1] #user passed custom strategy file 
 else:
     if HOUSE_RULES['hitsoft17']:
         STRATEGY_FILE = "BS_1.csv" #hitsoft17 
@@ -283,9 +284,9 @@ class Hand(object):
         Check a hand for a blackjack
         """
         
-        if not self.splithand and self.value == 21:
+        if self.value == 21:
             if all(c.value == 7 for c in self.cards) and HOUSE_RULES['triple7']:
-                return True
+                return False
             elif self.length() == 2: # 2 card 21 = blackjack and splithand = false
                 return True
             else:
@@ -460,14 +461,12 @@ class Game(object):
 
         if GAME_OPTIONS['usecount']:
             tc = self.shoe.truecount() 
-            if tc > COUNT_TIER[2]:
-                self.wager = Bet_Curr * BET_SPREAD
-            elif tc > COUNT_TIER[1]:
-                self.wager = Bet_Curr * BET_SPREAD * 0.5
-            elif tc > COUNT_TIER[0]:
-                self.wager = Bet_Curr * BET_SPREAD * 0.25
+            if tc > 6:
+                self.wager = (tc - 1) * BET_INCREMENT
+                if self.wager > 250:
+                    self.wager = 250
             else:
-                self.wager = Bet_Curr
+                self.wager = BET_MINIMUM
         else:
             self.wager = Bet_Curr
 
